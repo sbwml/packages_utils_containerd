@@ -57,6 +57,13 @@ endif
 # Reset golang-package.mk overrides so we can use the Makefile
 Build/Compile=$(call Build/Compile/Default)
 
+# Fix build error caused by missing info/git file required by //go:embed in nri vendor dependency
+define Build/Compile/Pre
+	mkdir -p $(PKG_BUILD_DIR)/$(MAKE_PATH)/vendor/github.com/containerd/nri/pkg/version/info
+	echo "v$(PKG_VERSION)" > $(PKG_BUILD_DIR)/$(MAKE_PATH)/vendor/github.com/containerd/nri/pkg/version/info/git
+endef
+Hooks/Compile/Pre += Build/Compile/Pre
+
 define Package/containerd/install
 	$(INSTALL_DIR) $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/bin/{ctr,containerd,containerd-stress,containerd-shim-runc-v2} $(1)/usr/bin/
